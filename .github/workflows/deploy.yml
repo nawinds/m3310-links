@@ -67,10 +67,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          commits="$(jq -c '.commits[] | select(.message | startswith("#") | not) | {
-            title: (.message | split("\n")[0]),
-            commit_url: .url
-          }' "$GITHUB_EVENT_PATH")"
+          commits="$(jq -c '.commits[] | select(.message | startswith("#") | not) |
+            (.message | split("\n") | map(select(length > 0))) as $lines | {
+              title: (if ($lines | length) > 1 then $lines[0] else "Обновление сайта" end),
+              body: (if ($lines | length) > 1 then $lines[1] else $lines[0] end),
+              commit_url: .url
+            }' "$GITHUB_EVENT_PATH")"
 
           if [[ -z "$commits" ]]; then
             echo "No commits eligible for push notifications."
@@ -81,13 +83,14 @@ jobs:
             payload="$(jq -n \
               --arg app_id "$ONESIGNAL_APP_ID" \
               --arg title "$(jq -r '.title' <<< "$commit")" \
+              --arg body "$(jq -r '.body' <<< "$commit")" \
               --arg commit_url "$(jq -r '.commit_url' <<< "$commit")" \
               '{
                 app_id: $app_id,
                 target_channel: "push",
                 included_segments: ["Total Subscriptions"],
                 headings: {en: $title},
-                contents: {en: "Обновление сайта"},
+                contents: {en: $body},
                 url: "https://m3300.nawinds.dev",
                 data: {commit_url: $commit_url}
               }')"
