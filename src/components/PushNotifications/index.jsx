@@ -242,7 +242,7 @@ export function PushNotificationsProvider({children}) {
                         <p id="push-notifications-description" className={styles.description}>
                             {permissionDenied
                                 ? 'Уведомления заблокированы. Разрешите их в настройках браузера для этого сайта.'
-                                : 'Получайте уведомление, когда на сайте появляются новые материалы.'}
+                                : 'Получайте уведомление, когда на сайте появляются новые материалы. Отключить можно в меню сайта.'}
                         </p>
                         {error && <p className={styles.warning}>{error}</p>}
                         <div className={styles.actions}>
