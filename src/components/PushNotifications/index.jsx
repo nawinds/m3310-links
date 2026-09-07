@@ -11,6 +11,35 @@ const PROMPT_REPEAT_DELAY = 30 * 24 * 60 * 60 * 1000;
 
 const PushNotificationsContext = createContext(null);
 
+function isActiveSubscription(subscription) {
+    return Boolean(subscription.optedIn && subscription.id && subscription.token);
+}
+
+function waitForActiveSubscription(subscription, timeout = 15000) {
+    if (isActiveSubscription(subscription)) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+        const handleChange = (event) => {
+            if (isActiveSubscription(event.current) || isActiveSubscription(subscription)) {
+                cleanup();
+                resolve();
+            }
+        };
+        const timer = window.setTimeout(() => {
+            cleanup();
+            reject(new Error(
+                'Разрешение получено, но OneSignal не создал push-подписку. Обновите страницу и попробуйте ещё раз.',
+            ));
+        }, timeout);
+        const cleanup = () => {
+            window.clearTimeout(timer);
+            subscription.removeEventListener('change', handleChange);
+        };
+
+        subscription.addEventListener('change', handleChange);
+    });
+}
+
 function initializeOneSignal(appId) {
     if (window.__m3300OneSignalPromise) {
         return window.__m3300OneSignalPromise;
@@ -77,7 +106,7 @@ export function PushNotificationsProvider({children}) {
         const syncState = (OneSignal, offerPrompt = false) => {
             if (!active) return;
 
-            const isSubscribed = Boolean(OneSignal.User.PushSubscription.optedIn);
+            const isSubscribed = isActiveSubscription(OneSignal.User.PushSubscription);
             const isDenied = Notification.permission === 'denied';
             setSubscribed(isSubscribed);
             setPermissionDenied(isDenied);
@@ -90,10 +119,12 @@ export function PushNotificationsProvider({children}) {
 
         const handleSubscriptionChange = (event) => {
             if (!active) return;
-            setSubscribed(Boolean(event.current.optedIn));
+            const isSubscribed = isActiveSubscription(event.current)
+                || isActiveSubscription(pushSubscription);
+            setSubscribed(isSubscribed);
             setPermissionDenied(Notification.permission === 'denied');
             setBusy(false);
-            if (event.current.optedIn) setPromptOpen(false);
+            if (isSubscribed) setPromptOpen(false);
         };
 
         initializeOneSignal(appId)
@@ -141,14 +172,17 @@ export function PushNotificationsProvider({children}) {
                 await oneSignal.User.PushSubscription.optOut();
             } else {
                 await oneSignal.User.PushSubscription.optIn();
+                await waitForActiveSubscription(oneSignal.User.PushSubscription);
             }
-            const isSubscribed = Boolean(oneSignal.User.PushSubscription.optedIn);
+            const isSubscribed = isActiveSubscription(oneSignal.User.PushSubscription);
             setSubscribed(isSubscribed);
             setPermissionDenied(Notification.permission === 'denied');
             if (isSubscribed) setPromptOpen(false);
         } catch (reason) {
             console.error('OneSignal subscription update failed', reason);
-            setError('Не удалось изменить настройку уведомлений.');
+            setError(reason instanceof Error
+                ? reason.message
+                : 'Не удалось изменить настройку уведомлений.');
             setPromptOpen(true);
         } finally {
             setBusy(false);

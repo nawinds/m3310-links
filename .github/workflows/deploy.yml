@@ -67,10 +67,40 @@ jobs:
         run: |
           set -euo pipefail
 
-          jq -c '.commits[] | select(.message | startswith("#") | not) | {
+          commits="$(jq -c '.commits[] | select(.message | startswith("#") | not) | {
             title: (.message | split("\n")[0]),
             commit_url: .url
-          }' "$GITHUB_EVENT_PATH" | while IFS= read -r commit; do
+          }' "$GITHUB_EVENT_PATH")"
+
+          if [[ -z "$commits" ]]; then
+            echo "No commits eligible for push notifications."
+            exit 0
+          fi
+
+          segments="$(curl --fail-with-body --silent --show-error \
+            --request GET \
+            --url "https://api.onesignal.com/apps/$ONESIGNAL_APP_ID/segments" \
+            --header "Authorization: Key $ONESIGNAL_REST_API_KEY")"
+          segment_id="$(jq -r 'first(.segments[] | select(.name == "Subscribed Users") | .id) // empty' <<< "$segments")"
+
+          if [[ -z "$segment_id" ]]; then
+            echo "::error::OneSignal segment 'Subscribed Users' was not found for app $ONESIGNAL_APP_ID. Check that the GitHub variable and API key belong to the same app."
+            exit 1
+          fi
+
+          segment="$(curl --fail-with-body --silent --show-error \
+            --request GET \
+            --url "https://api.onesignal.com/apps/$ONESIGNAL_APP_ID/segments/$segment_id" \
+            --header "Authorization: Key $ONESIGNAL_REST_API_KEY")"
+          subscriber_count="$(jq -r '.subscriber_count // 0' <<< "$segment")"
+          echo "Active OneSignal push subscriptions: $subscriber_count"
+
+          if [[ "$subscriber_count" -eq 0 ]]; then
+            echo "::error::OneSignal app $ONESIGNAL_APP_ID has subscription records, but no active push subscriptions in 'Subscribed Users'. Check the subscription status/channel in Audience and verify the App ID used by the website."
+            exit 1
+          fi
+
+          while IFS= read -r commit; do
             payload="$(jq -n \
               --arg app_id "$ONESIGNAL_APP_ID" \
               --arg title "$(jq -r '.title' <<< "$commit")" \
@@ -85,10 +115,18 @@ jobs:
                 data: {commit_url: $commit_url}
               }')"
 
-            curl --fail-with-body \
+            response="$(curl --fail-with-body --silent --show-error \
               --request POST \
               --url https://api.onesignal.com/notifications \
               --header "Authorization: Key $ONESIGNAL_REST_API_KEY" \
               --header 'Content-Type: application/json' \
-              --data "$payload"
-          done
+              --data "$payload")"
+
+            notification_id="$(jq -r '.id // empty' <<< "$response")"
+            if [[ -z "$notification_id" ]]; then
+              echo "::error::OneSignal accepted the request but did not create a notification: $response"
+              exit 1
+            fi
+
+            echo "OneSignal notification created: $notification_id"
+          done <<< "$commits"
