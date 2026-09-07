@@ -85,7 +85,7 @@ jobs:
               '{
                 app_id: $app_id,
                 target_channel: "push",
-                included_segments: ["Subscribed Users"],
+                included_segments: ["Total Subscriptions"],
                 headings: {en: $title},
                 contents: {en: "На сайте опубликовано обновление"},
                 url: "https://m3300.nawinds.dev",
