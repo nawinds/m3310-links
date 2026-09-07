@@ -85,7 +85,9 @@ export default function PushNotifications() {
 
                 pushSubscription = OneSignal.User.PushSubscription;
                 pushSubscription.addEventListener('change', handleSubscriptionChange);
-                setOneSignal(OneSignal);
+                // OneSignal is callable, so pass an updater that returns it.
+                // Otherwise React tries to invoke the SDK as a state updater.
+                setOneSignal(() => OneSignal);
                 syncState(OneSignal);
             })
             .catch((reason) => {
