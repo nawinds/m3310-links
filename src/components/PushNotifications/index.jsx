@@ -8,6 +8,30 @@ const SDK_URL = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
 const SDK_SCRIPT_ID = 'onesignal-web-sdk';
 const PROMPT_DISMISSED_KEY = 'm3300-push-prompt-dismissed-at';
 const PROMPT_REPEAT_DELAY = 30 * 24 * 60 * 60 * 1000;
+const NOTIFICATION_CHANNELS = [
+    {
+        id: 'study',
+        tag: 'm3300_notify_study',
+        label: 'Учебные материалы',
+        description: 'Новые конспекты, ссылки и материалы по предметам.',
+    },
+    {
+        id: 'deadlines',
+        tag: 'm3300_notify_deadlines',
+        label: 'Дедлайны',
+        description: 'Новые и изменённые сроки сдачи работ.',
+    },
+    {
+        id: 'other',
+        tag: 'm3300_notify_other',
+        label: 'Улучшения сайта',
+        description: 'Новые функции, исправления и прочие изменения сайта.',
+    },
+];
+
+const DEFAULT_CHANNEL_PREFERENCES = Object.fromEntries(
+    NOTIFICATION_CHANNELS.map(({id}) => [id, true]),
+);
 
 const PushNotificationsContext = createContext(null);
 
@@ -90,6 +114,33 @@ function shouldOfferNotifications() {
     return !dismissedAt || Date.now() - dismissedAt >= PROMPT_REPEAT_DELAY;
 }
 
+function readChannelPreferences(OneSignal) {
+    const tags = OneSignal.User.getTags();
+    const hasSavedPreferences = NOTIFICATION_CHANNELS.some(({tag}) => (
+        Object.prototype.hasOwnProperty.call(tags, tag)
+    ));
+
+    if (!hasSavedPreferences) {
+        return {
+            hasSavedPreferences: false,
+            preferences: {...DEFAULT_CHANNEL_PREFERENCES},
+        };
+    }
+
+    return {
+        hasSavedPreferences: true,
+        preferences: Object.fromEntries(
+            NOTIFICATION_CHANNELS.map(({id, tag}) => [id, tags[tag] === '1']),
+        ),
+    };
+}
+
+function channelPreferencesToTags(preferences) {
+    return Object.fromEntries(
+        NOTIFICATION_CHANNELS.map(({id, tag}) => [tag, preferences[id] ? '1' : '0']),
+    );
+}
+
 export function usePushNotifications() {
     return useContext(PushNotificationsContext);
 }
@@ -104,6 +155,9 @@ export function PushNotificationsProvider({children}) {
     const [busy, setBusy] = useState(Boolean(appId));
     const [error, setError] = useState('');
     const [promptOpen, setPromptOpen] = useState(false);
+    const [preferencesOpen, setPreferencesOpen] = useState(false);
+    const [channelPreferences, setChannelPreferences] = useState(DEFAULT_CHANNEL_PREFERENCES);
+    const [draftPreferences, setDraftPreferences] = useState(DEFAULT_CHANNEL_PREFERENCES);
 
     useEffect(() => {
         if (!appId) {
@@ -141,7 +195,7 @@ export function PushNotificationsProvider({children}) {
         };
 
         initializeOneSignal(appId)
-            .then((OneSignal) => {
+            .then(async (OneSignal) => {
                 if (!active) return;
                 if (!OneSignal.Notifications.isPushSupported()) {
                     setSupported(false);
@@ -153,6 +207,17 @@ export function PushNotificationsProvider({children}) {
                 pushSubscription.addEventListener('change', handleSubscriptionChange);
                 // OneSignal is callable, so it must be wrapped for React state.
                 setOneSignal(() => OneSignal);
+                const {hasSavedPreferences, preferences} = readChannelPreferences(OneSignal);
+                setChannelPreferences(preferences);
+                setDraftPreferences(preferences);
+
+                if (isActiveSubscription(pushSubscription) && !hasSavedPreferences) {
+                    try {
+                        await OneSignal.User.addTags(channelPreferencesToTags(preferences));
+                    } catch (reason) {
+                        console.error('OneSignal notification preferences migration failed', reason);
+                    }
+                }
                 syncState(OneSignal, true);
             })
             .catch((reason) => {
@@ -170,36 +235,79 @@ export function PushNotificationsProvider({children}) {
         };
     }, [appId]);
 
-    const toggleSubscription = async () => {
+    const openPreferences = () => {
+        setDraftPreferences(channelPreferences);
+        setError('');
+        setPromptOpen(false);
+        setPreferencesOpen(true);
+    };
+
+    const closePreferences = () => {
+        if (busy) return;
+        setPreferencesOpen(false);
+        setError('');
+    };
+
+    const savePreferences = async () => {
         if (!oneSignal || busy) return;
 
         if (permissionDenied && !subscribed) {
-            setPromptOpen(true);
+            return;
+        }
+
+        if (!Object.values(draftPreferences).some(Boolean)) {
+            setError('Выберите хотя бы одну категорию или выключите уведомления полностью.');
             return;
         }
 
         setBusy(true);
         setError('');
         try {
-            if (subscribed) {
-                await oneSignal.User.PushSubscription.optOut();
-            } else {
+            if (!subscribed) {
                 await oneSignal.User.PushSubscription.optIn();
                 await waitForActiveSubscription(oneSignal.User.PushSubscription);
             }
+            await oneSignal.User.addTags(channelPreferencesToTags(draftPreferences));
             const isSubscribed = isActiveSubscription(oneSignal.User.PushSubscription);
             setSubscribed(isSubscribed);
+            setChannelPreferences(draftPreferences);
             setPermissionDenied(Notification.permission === 'denied');
-            if (isSubscribed) setPromptOpen(false);
+            if (isSubscribed) {
+                setPromptOpen(false);
+                setPreferencesOpen(false);
+            }
         } catch (reason) {
             console.error('OneSignal subscription update failed', reason);
             setError(reason instanceof Error
                 ? reason.message
                 : 'Не удалось изменить настройку уведомлений.');
-            setPromptOpen(true);
         } finally {
             setBusy(false);
         }
+    };
+
+    const disableNotifications = async () => {
+        if (!oneSignal || busy || !subscribed) return;
+
+        setBusy(true);
+        setError('');
+        try {
+            await oneSignal.User.PushSubscription.optOut();
+            setSubscribed(false);
+            setPreferencesOpen(false);
+        } catch (reason) {
+            console.error('OneSignal subscription update failed', reason);
+            setError('Не удалось выключить уведомления. Попробуйте ещё раз.');
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const toggleDraftPreference = (channelId) => {
+        setDraftPreferences((current) => ({
+            ...current,
+            [channelId]: !current[channelId],
+        }));
     };
 
     const dismissPrompt = () => {
@@ -213,7 +321,7 @@ export function PushNotificationsProvider({children}) {
         permissionDenied,
         subscribed,
         supported,
-        toggleSubscription,
+        openPreferences,
     };
 
     return (
@@ -250,7 +358,7 @@ export function PushNotificationsProvider({children}) {
                                 <button
                                     type="button"
                                     className={styles.enableButton}
-                                    onClick={toggleSubscription}
+                                    onClick={openPreferences}
                                     disabled={busy || !oneSignal}
                                 >
                                     {busy ? 'Подключаем…' : 'Включить уведомления'}
@@ -262,6 +370,99 @@ export function PushNotificationsProvider({children}) {
                         </div>
                     </div>
                 </aside>
+            )}
+            {supported && preferencesOpen && (
+                <div className={styles.preferencesBackdrop} role="presentation">
+                    <section
+                        className={styles.preferencesDialog}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="push-preferences-title"
+                        aria-describedby="push-preferences-description"
+                    >
+                        <button
+                            type="button"
+                            className={styles.closeButton}
+                            onClick={closePreferences}
+                            disabled={busy}
+                            aria-label="Закрыть настройки уведомлений"
+                        >
+                            ×
+                        </button>
+                        <FiBell className={styles.promptIcon} aria-hidden="true" />
+                        <div>
+                            <h2 id="push-preferences-title" className={styles.title}>
+                                Настройка уведомлений
+                            </h2>
+                            <p id="push-preferences-description" className={styles.description}>
+                                {permissionDenied && !subscribed
+                                    ? 'Уведомления заблокированы. Разрешите их в настройках браузера для этого сайта.'
+                                    : 'Выберите категории, уведомления из которых хотите получать.'}
+                            </p>
+                        </div>
+
+                        {!(permissionDenied && !subscribed) && (
+                            <div className={styles.channelList}>
+                                {NOTIFICATION_CHANNELS.map((channel) => (
+                                    <label key={channel.id} className={styles.channelOption}>
+                                        <input
+                                            type="checkbox"
+                                            checked={Boolean(draftPreferences[channel.id])}
+                                            onChange={() => toggleDraftPreference(channel.id)}
+                                            disabled={busy}
+                                        />
+                                        <span>
+                                            <strong>{channel.label}</strong>
+                                            <small>{channel.description}</small>
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+
+                        {error && <p className={styles.warning}>{error}</p>}
+                        <div className={styles.preferencesActions}>
+                            {permissionDenied && !subscribed ? (
+                                <button type="button" className={styles.laterButton} onClick={closePreferences}>
+                                    Понятно
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        type="button"
+                                        className={styles.enableButton}
+                                        onClick={savePreferences}
+                                        disabled={busy}
+                                    >
+                                        {busy
+                                            ? 'Сохраняем…'
+                                            : subscribed
+                                                ? 'Сохранить'
+                                                : 'Включить выбранные'}
+                                    </button>
+                                    {subscribed && (
+                                        <button
+                                            type="button"
+                                            className={styles.disableButton}
+                                            onClick={disableNotifications}
+                                            disabled={busy}
+                                        >
+                                            Выключить уведомления
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        className={styles.laterButton}
+                                        onClick={closePreferences}
+                                        disabled={busy}
+                                    >
+                                        Отмена
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </section>
+                </div>
             )}
         </PushNotificationsContext.Provider>
     );

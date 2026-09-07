@@ -10,7 +10,7 @@ export default function PushNotificationsNavbarItem({className, mobileHeader = f
 
     if (!notifications) return null;
 
-    const {available, busy, subscribed, supported, toggleSubscription} = notifications;
+    const {available, busy, subscribed, supported, openPreferences} = notifications;
     const unavailable = !supported || !available;
     const title = !supported
         ? 'Уведомления недоступны в этом браузере или не настроены'
@@ -28,7 +28,7 @@ export default function PushNotificationsNavbarItem({className, mobileHeader = f
                 styles.navbarButton,
                 className,
             )}
-            onClick={toggleSubscription}
+            onClick={openPreferences}
             disabled={busy || unavailable}
             aria-pressed={subscribed}
             aria-label={title}

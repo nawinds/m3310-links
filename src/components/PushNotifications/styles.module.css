@@ -88,7 +88,8 @@
 }
 
 .enableButton,
-.laterButton {
+.laterButton,
+.disableButton {
     padding: 0.5rem 0.8rem;
     border-radius: var(--ifm-button-border-radius);
     font: inherit;
@@ -109,7 +110,95 @@
     background: transparent;
 }
 
+.disableButton {
+    border: 1px solid var(--ifm-color-danger-dark);
+    color: var(--ifm-color-danger-dark);
+    background: transparent;
+}
+
+.preferencesBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--ifm-z-index-fixed, 200) + 2);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgb(0 0 0 / 55%);
+}
+
+.preferencesDialog {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.9rem;
+    width: min(520px, 100%);
+    max-height: calc(100vh - 2rem);
+    padding: 1.25rem;
+    overflow-y: auto;
+    border: 1px solid var(--ifm-color-emphasis-300);
+    border-radius: 14px;
+    background: var(--ifm-background-surface-color);
+    box-shadow: var(--ifm-global-shadow-md);
+}
+
+.channelList,
+.preferencesActions,
+.preferencesDialog > .warning {
+    grid-column: 1 / -1;
+}
+
+.channelList {
+    display: grid;
+    gap: 0.65rem;
+}
+
+.channelOption {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.75rem;
+    align-items: start;
+    padding: 0.8rem;
+    border: 1px solid var(--ifm-color-emphasis-300);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.channelOption:hover {
+    border-color: var(--ifm-color-primary);
+}
+
+.channelOption input {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.15rem;
+    accent-color: var(--ifm-color-primary);
+}
+
+.channelOption span,
+.channelOption small {
+    display: block;
+}
+
+.channelOption small {
+    margin-top: 0.15rem;
+    color: var(--ifm-color-emphasis-700);
+    line-height: 1.35;
+}
+
+.preferencesActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
 .enableButton:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.disableButton:disabled,
+.laterButton:disabled,
+.closeButton:disabled {
     cursor: wait;
     opacity: 0.6;
 }
