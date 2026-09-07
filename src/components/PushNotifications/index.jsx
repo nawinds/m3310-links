@@ -52,6 +52,19 @@ function initializeOneSignal(appId) {
                 await OneSignal.init({
                     appId,
                     allowLocalhostAsSecureOrigin: true,
+                    notifyButton: {
+                        enable: false,
+                    },
+                    promptOptions: {
+                        slidedown: {
+                            prompts: [
+                                {
+                                    type: 'push',
+                                    autoPrompt: false,
+                                },
+                            ],
+                        },
+                    },
                 });
                 resolve(OneSignal);
             } catch (error) {
