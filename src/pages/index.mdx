@@ -13,17 +13,18 @@ import Deadlines from '@site/src/components/DeadlinesBlock';
       cookie: 'tab_public-speaking-lecturers',
       keywords: ['тпв'],
       aliases: {
-        limonova:  ['лимонова', 'limonova']
+        bulychev: ['Булычев', 'bulychev'],
+        nexign: ['Nexign', 'nexign']
       },
     },
     {
-      cookie: 'tab_history-lecturers',
-      keywords: ['история'],
+      cookie: 'tab_data-lecturers',
+      keywords: ['данные'],
       aliases: {
-        prigodich: ['пригодич', 'prigodich'],
-        pavlovskaya: ['павловская', 'pavlovskaya']
+        bulychev: ['Kotlin', 'kotlin'],
+        nexign: ['Другие', 'others']
       },
-    },
+    }
   ]}
 />
 
@@ -66,6 +67,14 @@ import PersistentTabs from '@site/src/components/PersistentTabs';
 
 ## Технологии управления данными
 
+<PersistentTabs groupId="compilators-lecturers" defaultValue="bulychev">
+  <TabItem value="kotlin" label="Kotlin">
+      [Кулешова Екатерина Дмитриевна](https://t.me/kuled)
+  </TabItem>
+  <TabItem value="others" label="Другие">
+    <EditPageLink filePath="/src/pages/index.mdx" linkText="Добавить информацию об этом курсе" deadlinesEdit={true} />
+  </TabItem>
+</PersistentTabs>
 
 import EditPageLink from '@site/src/components/EditPageLink';
 

@@ -114,15 +114,20 @@ jobs:
               channel_tag="m3300_notify_other"
             fi
 
+            if [[ "$channel_tag" == "m3300_notify_study" ]]; then
+              default_title="Новые материалы"
+              notification_icon="https://m3300.nawinds.dev/img/notifications/study.png"
+            elif [[ "$channel_tag" == "m3300_notify_deadlines" ]]; then
+              default_title="Новые дедлайны"
+              notification_icon="https://m3300.nawinds.dev/img/notifications/deadlines.png"
+            else
+              default_title="Улучшение сайта"
+              notification_icon="https://m3300.nawinds.dev/img/notifications/other.png"
+            fi
+
             notification_title="$(jq -r '.title' <<< "$commit")"
             if [[ -z "$notification_title" ]]; then
-              if [[ "$channel_tag" == "m3300_notify_study" ]]; then
-                notification_title="Новые материалы"
-              elif [[ "$channel_tag" == "m3300_notify_deadlines" ]]; then
-                notification_title="Новые дедлайны"
-              else
-                notification_title="Улучшение сайта"
-              fi
+              notification_title="$default_title"
             fi
 
             echo "Commit $commit_sha routed to $channel_tag (changed files: $changed_file_count)"
@@ -132,6 +137,7 @@ jobs:
               --arg title "$notification_title" \
               --arg body "$(jq -r '.body' <<< "$commit")" \
               --arg channel_tag "$channel_tag" \
+              --arg notification_icon "$notification_icon" \
               --arg commit_url "$(jq -r '.commit_url' <<< "$commit")" \
               '{
                 app_id: $app_id,
@@ -146,6 +152,9 @@ jobs:
                 ],
                 headings: {en: $title},
                 contents: {en: $body},
+                chrome_web_icon: $notification_icon,
+                firefox_icon: $notification_icon,
+                chrome_web_badge: $notification_icon,
                 url: "https://m3300.nawinds.dev",
                 data: {
                   commit_url: $commit_url,
