@@ -87,7 +87,7 @@ jobs:
                 target_channel: "push",
                 included_segments: ["Total Subscriptions"],
                 headings: {en: $title},
-                contents: {en: "На сайте опубликовано обновление"},
+                contents: {en: "Обновление сайта"},
                 url: "https://m3300.nawinds.dev",
                 data: {commit_url: $commit_url}
               }')"
