@@ -62,6 +62,10 @@ jobs:
       ONESIGNAL_APP_ID: ${{ vars.ONESIGNAL_APP_ID }}
       ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Send commit notification
         if: ${{ env.ONESIGNAL_APP_ID != '' && env.ONESIGNAL_REST_API_KEY != '' }}
         run: |
@@ -70,20 +74,18 @@ jobs:
           commits="$(jq -c '.commits[] | select(.message | startswith("#") | not) |
             (.message | split("\n") | map(select(length > 0))) as $raw_lines |
             ($raw_lines[0] // "") as $first_line |
-            ([(.added // [])[], (.modified // [])[], (.removed // [])[]] | unique) as $files |
-            (if ($first_line | startswith("!other")) then "m3300_notify_other"
-             elif ($first_line | startswith("!study")) then "m3300_notify_study"
-             elif ($first_line | startswith("!deadlines")) then "m3300_notify_deadlines"
-             elif (($files | length) == 1 and ($files[0] | startswith("src/pages/"))) then "m3300_notify_study"
-             elif ($files == ["static/DEADLINES.json"]) then "m3300_notify_deadlines"
-             else "m3300_notify_other"
-             end) as $channel_tag |
+            (if ($first_line | startswith("!other")) then "other"
+             elif ($first_line | startswith("!study")) then "study"
+             elif ($first_line | startswith("!deadlines")) then "deadlines"
+             else ""
+             end) as $channel_override |
             ($raw_lines |
               if length > 0 then .[0] |= sub("^!(study|deadlines|other)[[:space:]]*"; "") else . end |
               map(select(length > 0))) as $lines | {
                 title: (if ($lines | length) > 1 then $lines[0] else "Обновление сайта" end),
                 body: (if ($lines | length) > 1 then $lines[1] else ($lines[0] // "Обновление сайта") end),
-                channel_tag: $channel_tag,
+                channel_override: $channel_override,
+                commit_sha: .id,
                 commit_url: .url
               }' "$GITHUB_EVENT_PATH")"
 
@@ -93,11 +95,32 @@ jobs:
           fi
 
           while IFS= read -r commit; do
+            commit_sha="$(jq -r '.commit_sha' <<< "$commit")"
+            channel_override="$(jq -r '.channel_override' <<< "$commit")"
+            changed_files="$(git diff-tree --root --no-commit-id --name-only -r "$commit_sha")"
+            changed_file_count="$(awk 'NF {count++} END {print count + 0}' <<< "$changed_files")"
+
+            if [[ "$channel_override" == "other" ]]; then
+              channel_tag="m3300_notify_other"
+            elif [[ "$channel_override" == "study" ]]; then
+              channel_tag="m3300_notify_study"
+            elif [[ "$channel_override" == "deadlines" ]]; then
+              channel_tag="m3300_notify_deadlines"
+            elif [[ "$changed_file_count" -eq 1 && "$changed_files" == src/pages/* ]]; then
+              channel_tag="m3300_notify_study"
+            elif [[ "$changed_file_count" -eq 1 && "$changed_files" == "static/DEADLINES.json" ]]; then
+              channel_tag="m3300_notify_deadlines"
+            else
+              channel_tag="m3300_notify_other"
+            fi
+
+            echo "Commit $commit_sha routed to $channel_tag (changed files: $changed_file_count)"
+
             payload="$(jq -n \
               --arg app_id "$ONESIGNAL_APP_ID" \
               --arg title "$(jq -r '.title' <<< "$commit")" \
               --arg body "$(jq -r '.body' <<< "$commit")" \
-              --arg channel_tag "$(jq -r '.channel_tag' <<< "$commit")" \
+              --arg channel_tag "$channel_tag" \
               --arg commit_url "$(jq -r '.commit_url' <<< "$commit")" \
               '{
                 app_id: $app_id,
