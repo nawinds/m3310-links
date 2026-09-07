@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       LICENSE_KEY: ${{ secrets.LICENSE_KEY }}
+      ONESIGNAL_APP_ID: ${{ vars.ONESIGNAL_APP_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,3 +53,42 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify:
+    name: Notify subscribers
+    needs: deploy
+    runs-on: ubuntu-latest
+    env:
+      ONESIGNAL_APP_ID: ${{ vars.ONESIGNAL_APP_ID }}
+      ONESIGNAL_REST_API_KEY: ${{ secrets.ONESIGNAL_REST_API_KEY }}
+    steps:
+      - name: Send commit notification
+        if: ${{ env.ONESIGNAL_APP_ID != '' && env.ONESIGNAL_REST_API_KEY != '' }}
+        run: |
+          set -euo pipefail
+
+          jq -c '.commits[] | select(.message | startswith("#") | not) | {
+            title: (.message | split("\n")[0]),
+            commit_url: .url
+          }' "$GITHUB_EVENT_PATH" | while IFS= read -r commit; do
+            payload="$(jq -n \
+              --arg app_id "$ONESIGNAL_APP_ID" \
+              --arg title "$(jq -r '.title' <<< "$commit")" \
+              --arg commit_url "$(jq -r '.commit_url' <<< "$commit")" \
+              '{
+                app_id: $app_id,
+                target_channel: "push",
+                included_segments: ["Subscribed Users"],
+                headings: {en: $title},
+                contents: {en: "На сайте опубликовано обновление"},
+                url: "https://m3300.nawinds.dev",
+                data: {commit_url: $commit_url}
+              }')"
+
+            curl --fail-with-body \
+              --request POST \
+              --url https://api.onesignal.com/notifications \
+              --header "Authorization: Key $ONESIGNAL_REST_API_KEY" \
+              --header 'Content-Type: application/json' \
+              --data "$payload"
+          done

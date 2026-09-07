@@ -102,25 +102,25 @@ const config = {
                         href: '/point-distribution',
                     },
                     {
-                        label: 'Лекции',
-                        to: 'https://t.me/+_GAv-z_aZplhYmEy',
-                    },
-                    {
                         type: 'dropdown',
                         label: 'Архив',
                         position: 'left',
                         items: [
                             {
-                                label: 'Семестр 1',
+                                label: '1 семестр',
                                 href: '/archive/semester/1',
                             },
                             {
-                                label: 'Семестр 2',
+                                label: '2 семестр',
                                 href: '/archive/semester/2',
                             },
                             {
-                                label: 'Семестр 3',
+                                label: '3 семестр',
                                 href: '/archive/semester/3',
+                            },
+                            {
+                                label: '4 семестр',
+                                href: '/archive/semester/4'
                             }
                         ],
                     },
@@ -243,6 +243,7 @@ const config = {
     customFields: {
         licenseKey: process.env.LICENSE_KEY,
         ymCounter: '98560217',
+        oneSignalAppId: process.env.ONESIGNAL_APP_ID || '',
     },
 };
 

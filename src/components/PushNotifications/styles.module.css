@@ -1,0 +1,73 @@
+.card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin: 1.5rem 0 2rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--ifm-color-emphasis-300);
+    border-radius: var(--ifm-card-border-radius);
+    background: var(--ifm-card-background-color);
+    box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.text {
+    min-width: 0;
+}
+
+.title {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+}
+
+.description,
+.warning {
+    margin: 0;
+}
+
+.warning {
+    margin-top: 0.4rem;
+    color: var(--ifm-color-warning-darkest);
+    font-size: 0.9rem;
+}
+
+.enableButton,
+.disableButton {
+    flex: 0 0 auto;
+    padding: 0.55rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--ifm-button-border-radius);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.enableButton {
+    color: var(--ifm-button-color);
+    background: var(--ifm-color-primary);
+}
+
+.disableButton {
+    color: var(--ifm-font-color-base);
+    border-color: var(--ifm-color-emphasis-400);
+    background: transparent;
+}
+
+.enableButton:disabled,
+.disableButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+@media (max-width: 600px) {
+    .card {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .enableButton,
+    .disableButton {
+        width: 100%;
+    }
+}

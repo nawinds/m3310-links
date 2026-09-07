@@ -11,6 +11,7 @@
 3. [Локальная разработка / Local Development](#локальная-разработка--local-development)
 4. [Сборка / Build](#сборка--build)
 5. [Развертывание / Deployment](#развертывание--deployment)
+   - [Push-уведомления о коммитах](#push-уведомления-о-коммитах)
 6. [Редактирование сайта](#редактирование-сайта)
    - [Редактирование главной страницы](#редактирование-главной-страницы)
    - [Редактирование дедлайнов](#редактирование-дедлайнов)
@@ -80,6 +81,17 @@ $ GIT_USER=<Your GitHub username> yarn deploy
 Если Вы используете GitHub Pages для хостинга, эта команда является удобным способом собрать сайт и запушить его в ветку `gh-pages`.
 
 If you are using GitHub Pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+
+#### Push-уведомления о коммитах
+
+Push-уведомления работают через OneSignal, так как GitHub Pages не может хранить браузерные подписки самостоятельно.
+
+1. Создайте Web Push приложение в OneSignal для `https://m3300.nawinds.dev`.
+2. В настройках service worker приложения укажите путь `/push/onesignal/`, файл `OneSignalSDKWorker.js` и scope `/push/onesignal/`.
+3. В GitHub откройте **Settings → Secrets and variables → Actions → Variables** и добавьте `ONESIGNAL_APP_ID`.
+4. Там же в **Secrets** добавьте `ONESIGNAL_REST_API_KEY`. Секретный API-ключ нельзя добавлять в код репозитория.
+
+После успешной публикации workflow отправляет подписчикам уведомление с первой строкой сообщения каждого нового коммита. Если сообщение коммита начинается с `#`, уведомление для него не отправляется.
 
 
 ### Редактирование сайта
