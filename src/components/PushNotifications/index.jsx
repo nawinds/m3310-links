@@ -17,8 +17,6 @@ function initializeOneSignal(appId) {
             try {
                 await OneSignal.init({
                     appId,
-                    serviceWorkerPath: 'push/onesignal/OneSignalSDKWorker.js',
-                    serviceWorkerParam: {scope: '/push/onesignal/'},
                     allowLocalhostAsSecureOrigin: true,
                 });
                 resolve(OneSignal);

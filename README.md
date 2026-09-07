@@ -86,8 +86,8 @@ If you are using GitHub Pages for hosting, this command is a convenient way to b
 
 Push-уведомления работают через OneSignal, так как GitHub Pages не может хранить браузерные подписки самостоятельно.
 
-1. Создайте Web Push приложение в OneSignal для `https://m3300.nawinds.dev` и выберите интеграцию **Custom Code**.
-2. В **Settings → Push & In-App → Web Settings → Advanced Push Settings** включите настройку путей service worker и укажите path `/push/onesignal/`, filename `OneSignalSDKWorker.js` и scope `/push/onesignal/`.
+1. Создайте Web Push приложение в OneSignal для `https://m3300.nawinds.dev`.
+2. Оставьте стандартные настройки service worker OneSignal: path `/`, filename `OneSignalSDKWorker.js` и scope `/`. Этот worker также подключает сгенерированный Docusaurus `/sw.js`, поэтому push-уведомления и PWA используют одну регистрацию.
 3. В GitHub откройте **Settings → Secrets and variables → Actions → Variables** и добавьте `ONESIGNAL_APP_ID`.
 4. Там же в **Secrets** добавьте `ONESIGNAL_REST_API_KEY`. Секретный API-ключ нельзя добавлять в код репозитория.
 

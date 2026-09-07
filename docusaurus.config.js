@@ -208,6 +208,9 @@ const config = {
             '@docusaurus/plugin-pwa',
             {
                 debug: true,
+                // OneSignalSDKWorker.js imports the generated /sw.js and owns
+                // the root scope, so Docusaurus must not register a competing worker.
+                swRegister: false,
                 offlineModeActivationStrategies: [
                     'appInstalled',
                     'standalone',
