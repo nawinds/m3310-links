@@ -1,22 +1,71 @@
-.card {
-    display: flex;
+.navbarButton {
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-    margin: 1.5rem 0 2rem;
-    padding: 1rem 1.25rem;
-    border: 1px solid var(--ifm-color-emphasis-300);
-    border-radius: var(--ifm-card-border-radius);
-    background: var(--ifm-card-background-color);
-    box-shadow: var(--ifm-global-shadow-lw);
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: #000;
+    line-height: 1;
 }
 
-.text {
-    min-width: 0;
+[data-theme='dark'] .navbarButton {
+    color: #fff;
+}
+
+.navbarIcon {
+    width: 1.2rem;
+    height: 1.2rem;
+    stroke-width: 1.8;
+}
+
+.navbarButton:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.prompt {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: calc(var(--ifm-z-index-fixed, 200) + 1);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.9rem;
+    width: min(430px, calc(100vw - 2rem));
+    padding: 1.2rem;
+    border: 1px solid var(--ifm-color-emphasis-300);
+    border-radius: 12px;
+    background: var(--ifm-background-surface-color);
+    box-shadow: var(--ifm-global-shadow-md);
+}
+
+.promptIcon {
+    width: 1.6rem;
+    height: 1.6rem;
+    color: #000;
+    stroke-width: 1.8;
+}
+
+[data-theme='dark'] .promptIcon {
+    color: #fff;
+}
+
+.closeButton {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.55rem;
+    padding: 0.1rem 0.35rem;
+    border: 0;
+    color: var(--ifm-color-emphasis-700);
+    background: transparent;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
 }
 
 .title {
-    margin: 0 0 0.25rem;
+    margin: 0 1.5rem 0.35rem 0;
     font-size: 1.1rem;
 }
 
@@ -26,48 +75,48 @@
 }
 
 .warning {
-    margin-top: 0.4rem;
+    margin-top: 0.45rem;
     color: var(--ifm-color-warning-darkest);
     font-size: 0.9rem;
 }
 
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+}
+
 .enableButton,
-.disableButton {
-    flex: 0 0 auto;
-    padding: 0.55rem 1rem;
-    border: 1px solid transparent;
+.laterButton {
+    padding: 0.5rem 0.8rem;
     border-radius: var(--ifm-button-border-radius);
     font: inherit;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
 }
 
 .enableButton {
+    border: 1px solid var(--ifm-color-primary);
     color: var(--ifm-button-color);
     background: var(--ifm-color-primary);
 }
 
-.disableButton {
+.laterButton {
+    border: 1px solid var(--ifm-color-emphasis-400);
     color: var(--ifm-font-color-base);
-    border-color: var(--ifm-color-emphasis-400);
     background: transparent;
 }
 
-.enableButton:disabled,
-.disableButton:disabled {
-    cursor: not-allowed;
+.enableButton:disabled {
+    cursor: wait;
     opacity: 0.6;
 }
 
 @media (max-width: 600px) {
-    .card {
-        align-items: stretch;
-        flex-direction: column;
-        gap: 0.8rem;
-    }
-
-    .enableButton,
-    .disableButton {
-        width: 100%;
+    .prompt {
+        right: 1rem;
+        bottom: 1rem;
     }
 }
