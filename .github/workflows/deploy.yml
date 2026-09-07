@@ -82,7 +82,7 @@ jobs:
             ($raw_lines |
               if length > 0 then .[0] |= sub("^!(study|deadlines|other)[[:space:]]*"; "") else . end |
               map(select(length > 0))) as $lines | {
-                title: (if ($lines | length) > 1 then $lines[0] else "Обновление сайта" end),
+                title: (if ($lines | length) > 1 then $lines[0] else "" end),
                 body: (if ($lines | length) > 1 then $lines[1] else ($lines[0] // "Обновление сайта") end),
                 channel_override: $channel_override,
                 commit_sha: .id,
@@ -114,11 +114,22 @@ jobs:
               channel_tag="m3300_notify_other"
             fi
 
+            notification_title="$(jq -r '.title' <<< "$commit")"
+            if [[ -z "$notification_title" ]]; then
+              if [[ "$channel_tag" == "m3300_notify_study" ]]; then
+                notification_title="Новые материалы"
+              elif [[ "$channel_tag" == "m3300_notify_deadlines" ]]; then
+                notification_title="Новые дедлайны"
+              else
+                notification_title="Улучшение сайта"
+              fi
+            fi
+
             echo "Commit $commit_sha routed to $channel_tag (changed files: $changed_file_count)"
 
             payload="$(jq -n \
               --arg app_id "$ONESIGNAL_APP_ID" \
-              --arg title "$(jq -r '.title' <<< "$commit")" \
+              --arg title "$notification_title" \
               --arg body "$(jq -r '.body' <<< "$commit")" \
               --arg channel_tag "$channel_tag" \
               --arg commit_url "$(jq -r '.commit_url' <<< "$commit")" \
