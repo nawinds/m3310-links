@@ -15,71 +15,41 @@ import EditPageLink from '@site/src/components/EditPageLink';
 # Баллы по всем предметам
 
 <LecturersProvider
-    initial={{history: 'prigodich', kik: 'limonova'}}
+    initial={{data: 'golang'}}
     cookieKeys={{
-        history: 'tab_history-lecturers',
-        kik: 'tab_kik-lecturers',
+        data: 'tab_data',
     }}
 >
 
     <LecturerMatrixButton
         subjects={[
             {
-                id: 'history',
-                title: 'История',
+                id: 'data',
+                title: 'Технологии управления данными',
                 options: [
-                    {value: 'prigodich', label: 'Пригодич'},
-                    {value: 'pavlovskaya', label: 'Павловская'},
-                    {value: 'other', label: 'Другой поток'},
+                    {value: 'golang', label: 'Golang (Панасюк)'},
+                    {value: 'others', label: 'Другой поток'},
                 ]
-            },
-            {
-                id: 'kik',
-                title: 'КиК',
-                options: [
-                    {value: 'limonova', label: 'Лимонова'},
-                    {value: 'other', label: 'Другой поток'},
-                ],
             },
         ]}
     />
 
-    <!--<GradesTableLink title="Дополнительные главы высшей математики" url="#" shortcutKeys={['d', 'д', 'в', 'l']} />-->
-    <!--<GradesTableLink title="Теория вероятности" url="#" shortcutKeys={['t', 'т', 'е', 'n']} />-->
-    <!--<GradesTableLink title="Физика" url="https://docs.google.com/spreadsheets/d/1PJ3ah4UcDMM3o88Kvj3R8WijVclNgDbUR5wQEAOKqck/edit?gid=0#gid=0" shortcutKeys={['f', 'ф', 'а', 'a']} />-->
-    <!--<GradesTableLink title="Базы данных" url="#" shortcutKeys={['b', 'б', 'и', ',']} />-->
-    <!--<GradesTableLink title="Объектно-ориентированное программирование" url="https://docs.google.com/spreadsheets/d/1IyU7pLBKrUuZOmWRZn3TRRSNiVgioEhnfAVIr4Qlh5g/edit?gid=0#gid=0&range=A64" shortcutKeys={['o', 'о', 'щ', 'j']} />-->
+    <GradesTableLink title="WEB" url="https://docs.google.com/spreadsheets/d/1A1RWLbUOdxYhmWGEaC457X-nWuMf-brnb8I5eZfQWq4/edit?gid=707082463#gid=707082463" shortcutKeys={['w', 'в', 'ц', 'd']} />
+    <GradesTableLink title="UML" url="https://docs.google.com/spreadsheets/d/1oXYRZzpfipy78-7DrE-8jXApsr34_3N9PgMCl_EKTcw" shortcutKeys={['u', 'г']} />
+    <GradesTableLink title="Машинное обучение" url="https://docs.google.com/spreadsheets/d/1wuhCen3fOMEtVy8NBeMxTH8xc-sym5iRJMQpiaa1W-E/edit?usp=drive_web&ouid=108449354531297966968" shortcutKeys={['m', 'м', 'ь', 'v']} />
+    <GradesTableLink title="Сети" url="https://docs.google.com/spreadsheets/d/1dfK39wVIiJvvSU-PGUJf8l1BYL8gllVGGVjTEq0TUVA/edit?gid=104072740#gid=104072740" shortcutKeys={['s', 'с', 'ы', 'c']} />
+    <GradesTableLink title="Физика" url="https://docs.google.com/spreadsheets/d/1HwjBwH0AsKhnO_T4mzZMbeVQ8WfJ4njgGJ86dJFFd2c/edit?gid=694736775#gid=694736775" shortcutKeys={['p', 'ф', 'з', 'a']} />
 
-    {/* История */}
-    <WhenLecturer subjectId="history" value="prigodich">
+    {/* Технологии управления данными */}
+    <WhenLecturer subjectId="data" value="golang">
         <!--<GradesTableLink
-            title="История (Пригодич)"
+            title="Golang (Панасюк)"
             url="https://docs.google.com/spreadsheets/d/1j2RmIFyQhdzfFyFqEQnBmUISlvYN4bRKvQp1lO1oCxk/edit?gid=646964733#gid=646964733"
-            shortcutKeys={['и', 'h', 'р', 'b']}
+            shortcutKeys={['g', 'г']}
         />-->
     </WhenLecturer>
 
-    <WhenLecturer subjectId="history" value="pavlovskaya">
-        <!--<GradesTableLink
-            title="История (Павловская)"
-            url="https://docs.google.com/spreadsheets/d/1j2RmIFyQhdzfFyFqEQnBmUISlvYN4bRKvQp1lO1oCxk/edit?gid=1255579626#gid=1255579626"
-            shortcutKeys={['и', 'h', 'р', 'b']}
-        />-->
-    </WhenLecturer>
-
-    <WhenLecturer subjectId="history" value="other">
-    </WhenLecturer>
-
-    {/* ТПВ */}
-    <WhenLecturer subjectId="kik" value="limonova">
-        <!--<GradesTableLink
-            title="ТПВ (Лимонова)"
-            url="https://docs.google.com/spreadsheets/d/1v3cq9jPR6Khd004ocL5LUTKDVy-hTqvJUadr3J2EwEA/edit?gid=300672172#gid=300672172"
-            shortcutKeys={['т', 't', 'е', 'n']}
-        />-->
-    </WhenLecturer>
-
-    <WhenLecturer subjectId="kik" value="other">
+    <WhenLecturer subjectId="data" value="others">
     </WhenLecturer>
 
     <EditPageLink filePath="/src/pages/table-grades.mdx"/>
