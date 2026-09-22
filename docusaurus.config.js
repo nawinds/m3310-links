@@ -8,13 +8,13 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-    title: 'M3304',
-    tagline: 'Полезные ссылки группы M3304 ИТМО',
+    title: 'M3310',
+    tagline: 'Полезные ссылки группы M3310 ИТМО',
     favicon: 'img/favicon.ico',
     trailingSlash: false,
 
     // Set the production url of your site here
-    url: 'https://M3304.nawinds.dev',
+    url: 'https://M3310.nawinds.dev',
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: '/',
@@ -22,7 +22,7 @@ const config = {
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
     organizationName: 'nawinds', // Usually your GitHub org/user name.
-    projectName: 'm3304-links', // Usually your repo name.
+    projectName: 'm3310-links', // Usually your repo name.
 
     onBrokenLinks: 'throw',
     onBrokenMarkdownLinks: 'warn',
@@ -171,16 +171,16 @@ const config = {
                         title: 'Контакты',
                         items: [
                             {
-                                label: 'm3304@nawinds.dev',
-                                href: 'mailto:m3304@nawinds.dev',
+                                label: 'm3310@nawinds.dev',
+                                href: 'mailto:m3310@nawinds.dev',
                             },
                             {
                                 label: 'Исходный код',
-                                href: 'https://github.com/nawinds/m3304-links',
+                                href: 'https://github.com/nawinds/m3310-links',
                             },
                             {
                                 label: 'Внесли вклад',
-                                href: 'https://github.com/nawinds/m3304-links/graphs/contributors',
+                                href: 'https://github.com/nawinds/m3310-links/graphs/contributors',
                             },
                         ],
                     },

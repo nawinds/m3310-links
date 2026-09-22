@@ -1,6 +1,6 @@
-# Сайт полезных ссылок группы M3304 Университета ИТМО — [M3304.nawinds.dev](https://m3304.nawinds.dev)
+# Сайт полезных ссылок группы M3310 Университета ИТМО — [M3310.nawinds.dev](https://m3310.nawinds.dev)
 
-### Useful links website for M3304 group @ ITMO University — [M3304.nawinds.dev](https://m3304.nawinds.dev)
+### Useful links website for M3310 group @ ITMO University — [M3310.nawinds.dev](https://m3310.nawinds.dev)
 
 ---
 
