@@ -5,4 +5,4 @@ Disallow: /deadlines-editing-instructions
 Disallow: /deadlines-block
 Disallow: /lgd.pdf
 
-Sitemap: https://m3204.nawinds.dev/sitemap.xml
+Sitemap: https://m3304.nawinds.dev/sitemap.xml

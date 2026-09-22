@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://m3204.nawinds.dev</loc>
+        <loc>https://m3304.nawinds.dev</loc>
         <changefreq>hourly</changefreq>
         <priority>1.0</priority>
     </url>
 
     <url>
-        <loc>https://m3204.nawinds.dev/table-grades</loc>
+        <loc>https://m3304.nawinds.dev/table-grades</loc>
         <changefreq>daily</changefreq>
         <priority>0.7</priority>
     </url>
 
     <url>
-        <loc>https://m3204.nawinds.dev/point-distribution</loc>
+        <loc>https://m3304.nawinds.dev/point-distribution</loc>
         <changefreq>daily</changefreq>
         <priority>0.5</priority>
     </url>
 
     <url>
-        <loc>https://m3204.nawinds.dev/math-lecture-recordings</loc>
+        <loc>https://m3304.nawinds.dev/math-lecture-recordings</loc>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
 
     <url>
-        <loc>https://m3204.nawinds.dev/archive/semester/1</loc>
+        <loc>https://m3304.nawinds.dev/archive/semester/1</loc>
         <changefreq>monthly</changefreq>
         <priority>0.4</priority>
     </url>
 
     <url>
-        <loc>https://m3204.nawinds.dev/archive/semester/1/table-grades</loc>
+        <loc>https://m3304.nawinds.dev/archive/semester/1/table-grades</loc>
         <changefreq>monthly</changefreq>
         <priority>0.3</priority>
     </url>
 
     <url>
-        <loc>https://m3204.nawinds.dev/archive/semester/1/table-distribution</loc>
+        <loc>https://m3304.nawinds.dev/archive/semester/1/table-distribution</loc>
         <changefreq>monthly</changefreq>
         <priority>0.2</priority>
     </url>
